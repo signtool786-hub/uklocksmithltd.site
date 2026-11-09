@@ -6,53 +6,85 @@ export default function Seo({
   description,
   path = '',
   includeSchema = true,
+  areaServed = null,
+  breadcrumbs = null,
+  noindex = false,
 }) {
   const canonicalUrl = `${SITE}${path ? (path.startsWith('/') ? path : `/${path}`) : ''}`.replace(/\/$/, '');
   const ogImageUrl = `${SITE}/og-image.jpg`;
 
-  const locksmithSchema = {
-    '@context': 'https://schema.org',
-    '@type': 'Locksmith',
-    name: BRAND,
-    url: SITE,
-    logo: `${SITE}/favicon.svg`,
-    image: ogImageUrl,
-    telephone: PHONE.display,
-    priceRange: '££',
-    description:
-      '24-hour emergency locksmith service across London. Fast response, non-destructive entry, and upfront fixed pricing.',
-    address: {
-      '@type': 'PostalAddress',
-      addressLocality: 'London',
-      addressRegion: 'Greater London',
-      addressCountry: 'GB',
-    },
-    geo: {
-      '@type': 'GeoCoordinates',
-      latitude: 51.5074,
-      longitude: -0.1278,
-    },
-    areaServed: {
-      '@type': 'City',
-      name: 'London',
-    },
-    openingHoursSpecification: [
-      {
-        '@type': 'OpeningHoursSpecification',
-        dayOfWeek: [
-          'Monday',
-          'Tuesday',
-          'Wednesday',
-          'Thursday',
-          'Friday',
-          'Saturday',
-          'Sunday',
+  const locksmithSchema = areaServed
+    ? {
+        '@context': 'https://schema.org',
+        '@type': 'Locksmith',
+        name: BRAND,
+        url: canonicalUrl,
+        logo: `${SITE}/favicon.svg`,
+        image: ogImageUrl,
+        telephone: PHONE.display,
+        priceRange: '££',
+        description: description,
+        areaServed: {
+          '@type': 'City',
+          name: areaServed,
+        },
+      }
+    : {
+        '@context': 'https://schema.org',
+        '@type': 'Locksmith',
+        name: BRAND,
+        url: SITE,
+        logo: `${SITE}/favicon.svg`,
+        image: ogImageUrl,
+        telephone: PHONE.display,
+        priceRange: '££',
+        description:
+          '24-hour emergency locksmith service across London. Fast response, non-destructive entry, and upfront fixed pricing.',
+        address: {
+          '@type': 'PostalAddress',
+          addressLocality: 'London',
+          addressRegion: 'Greater London',
+          addressCountry: 'GB',
+        },
+        geo: {
+          '@type': 'GeoCoordinates',
+          latitude: 51.5074,
+          longitude: -0.1278,
+        },
+        areaServed: {
+          '@type': 'City',
+          name: 'London',
+        },
+        openingHoursSpecification: [
+          {
+            '@type': 'OpeningHoursSpecification',
+            dayOfWeek: [
+              'Monday',
+              'Tuesday',
+              'Wednesday',
+              'Thursday',
+              'Friday',
+              'Saturday',
+              'Sunday',
+            ],
+            opens: '00:00',
+            closes: '23:59',
+          },
         ],
-        opens: '00:00',
-        closes: '23:59',
-      },
-    ],
-  };
+      };
+
+  const breadcrumbSchema = breadcrumbs
+    ? {
+        '@context': 'https://schema.org',
+        '@type': 'BreadcrumbList',
+        itemListElement: breadcrumbs.map((crumb, idx) => ({
+          '@type': 'ListItem',
+          position: idx + 1,
+          name: crumb.name,
+          item: crumb.item,
+        })),
+      }
+    : null;
 
   return (
     <Helmet>
@@ -61,6 +93,7 @@ export default function Seo({
       <meta name="title" content={title} />
       <meta name="description" content={description} />
       <link rel="canonical" href={canonicalUrl} />
+      {noindex && <meta name="robots" content="noindex, nofollow" />}
 
       {/* Open Graph / Facebook */}
       <meta property="og:type" content="website" />
@@ -84,6 +117,11 @@ export default function Seo({
       {includeSchema && (
         <script type="application/ld+json">
           {JSON.stringify(locksmithSchema)}
+        </script>
+      )}
+      {breadcrumbSchema && (
+        <script type="application/ld+json">
+          {JSON.stringify(breadcrumbSchema)}
         </script>
       )}
     </Helmet>

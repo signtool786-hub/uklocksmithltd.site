@@ -2,7 +2,7 @@ import { motion } from 'framer-motion';
 import { PHONE, HOURS, CTA_STEPS, IMAGES } from '../config';
 import CallButton from './CallButton';
 
-export default function Cta({ title }) {
+export default function Cta({ title, outsideLondon = false }) {
   const displayTitle = title || 'Locked out or need a lock replaced right now?';
 
   return (
@@ -32,7 +32,7 @@ export default function Cta({ title }) {
           {/* Left Column: Direct Call Info */}
           <div className="lg:col-span-7 space-y-6">
             <span className="text-xs uppercase font-bold tracking-widest text-coral">
-              Direct London Dispatch Line
+              {outsideLondon ? 'Direct Locksmith Line' : 'Direct London Dispatch Line'}
             </span>
             <h2 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold font-heading text-mist tracking-tight leading-[1.15]">
               {displayTitle}
@@ -68,30 +68,36 @@ export default function Cta({ title }) {
             </h3>
 
             <div className="space-y-6">
-              {CTA_STEPS.map((item) => (
-                <div key={item.step} className="flex items-start gap-4">
-                  <div
-                    className="w-8 h-8 rounded-full bg-forest border-2 border-coral text-coral font-heading font-extrabold text-sm flex items-center justify-center shrink-0 shadow-sm mt-0.5"
-                    aria-hidden="true"
-                  >
-                    {item.step}
+              {CTA_STEPS.map((item) => {
+                const itemDesc = outsideLondon
+                  ? item.desc.replace(/London address/gi, 'property address')
+                  : item.desc;
+
+                return (
+                  <div key={item.step} className="flex items-start gap-4">
+                    <div
+                      className="w-8 h-8 rounded-full bg-forest border-2 border-coral text-coral font-heading font-extrabold text-sm flex items-center justify-center shrink-0 shadow-sm mt-0.5"
+                      aria-hidden="true"
+                    >
+                      {item.step}
+                    </div>
+                    <div>
+                      <h4 className="text-base font-bold font-heading text-mist">
+                        {item.title}
+                      </h4>
+                      <p className="text-xs sm:text-sm text-mist/80 mt-1 leading-relaxed">
+                        {itemDesc}
+                      </p>
+                    </div>
                   </div>
-                  <div>
-                    <h4 className="text-base font-bold font-heading text-mist">
-                      {item.title}
-                    </h4>
-                    <p className="text-xs sm:text-sm text-mist/80 mt-1 leading-relaxed">
-                      {item.desc}
-                    </p>
-                  </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
 
             <div className="mt-8 pt-4 border-t border-forest2/90 flex items-center justify-between text-xs text-mist/70">
               <span>Fixed quote over the phone</span>
               <span>•</span>
-              <span>All London postcodes</span>
+              <span>{outsideLondon ? 'Direct mobile dispatch' : 'All London postcodes'}</span>
             </div>
           </div>
         </motion.div>

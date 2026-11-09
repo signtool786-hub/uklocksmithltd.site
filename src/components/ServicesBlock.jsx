@@ -128,6 +128,18 @@ export default function ServicesBlock({ full = false, area }) {
   const primaryServices = SERVICES.filter((s) => s.isPrimary);
   const secondaryServices = SERVICES.filter((s) => !s.isPrimary);
 
+  const cleanDesc = (text) => {
+    if (!area || !text) return text;
+    return text
+      .replace(/across London/gi, `across ${area}`)
+      .replace(/for London businesses/gi, `for ${area} businesses`);
+  };
+
+  const cleanAlt = (text) => {
+    if (!area || !text) return text;
+    return text.replace(/\bLondon\b/gi, area);
+  };
+
   return (
     <section
       aria-label="Locksmith services"
@@ -163,7 +175,7 @@ export default function ServicesBlock({ full = false, area }) {
                       src={IMAGES.services[primaryServices[0].id]?.src}
                       srcSet={IMAGES.services[primaryServices[0].id]?.srcSet}
                       sizes="(min-width: 1024px) 580px, 100vw"
-                      alt={IMAGES.services[primaryServices[0].id]?.alt}
+                      alt={cleanAlt(IMAGES.services[primaryServices[0].id]?.alt)}
                       width={IMAGES.services[primaryServices[0].id]?.width}
                       height={IMAGES.services[primaryServices[0].id]?.height}
                       loading="lazy"
@@ -183,10 +195,10 @@ export default function ServicesBlock({ full = false, area }) {
                     {primaryServices[0].title}
                   </h3>
                   <p className="text-text/85 text-base sm:text-lg leading-relaxed mt-3">
-                    {primaryServices[0].shortDesc}
+                    {cleanDesc(primaryServices[0].shortDesc)}
                   </p>
                   <p className="text-text/75 text-sm leading-relaxed mt-2">
-                    {primaryServices[0].longDesc}
+                    {cleanDesc(primaryServices[0].longDesc)}
                   </p>
                 </div>
                 <div className="pt-6 mt-6 border-t border-sage/50 flex flex-wrap items-center justify-between gap-4">
@@ -208,7 +220,7 @@ export default function ServicesBlock({ full = false, area }) {
                       src={IMAGES.services[primaryServices[1].id]?.src}
                       srcSet={IMAGES.services[primaryServices[1].id]?.srcSet}
                       sizes="(min-width: 1024px) 440px, 100vw"
-                      alt={IMAGES.services[primaryServices[1].id]?.alt}
+                      alt={cleanAlt(IMAGES.services[primaryServices[1].id]?.alt)}
                       width={IMAGES.services[primaryServices[1].id]?.width}
                       height={IMAGES.services[primaryServices[1].id]?.height}
                       loading="lazy"
@@ -259,7 +271,7 @@ export default function ServicesBlock({ full = false, area }) {
                       src={IMAGES.services[service.id]?.src}
                       srcSet={IMAGES.services[service.id]?.srcSet}
                       sizes="(min-width: 1024px) 280px, 100vw"
-                      alt={IMAGES.services[service.id]?.alt}
+                      alt={cleanAlt(IMAGES.services[service.id]?.alt)}
                       width={IMAGES.services[service.id]?.width}
                       height={IMAGES.services[service.id]?.height}
                       loading="lazy"
@@ -274,7 +286,7 @@ export default function ServicesBlock({ full = false, area }) {
                     {service.title}
                   </h3>
                   <p className="text-text/80 text-xs sm:text-sm leading-relaxed mt-2">
-                    {service.shortDesc}
+                    {cleanDesc(service.shortDesc)}
                   </p>
                 </div>
                 <div className="pt-4 mt-4 border-t border-sage/40">

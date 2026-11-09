@@ -1,6 +1,9 @@
 import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
 import tailwindcss from '@tailwindcss/vite';
+import { AREAS } from './src/data/areas.js';
+import { AREA_DESCRIPTIONS } from './src/data/area-descriptions.js';
+import { PILOT_AREAS } from './src/data/pilot-areas.js';
 
 const SITE = 'https://uklocksmithltd.site';
 const BRAND = 'UK Locksmith LTD';
@@ -29,9 +32,9 @@ const META_MAP = {
     includeSchema: true,
   },
   '/areas': {
-    title: 'London Service Areas | UK Locksmith LTD',
+    title: 'Areas We Cover | UK Locksmith LTD',
     description:
-      '24/7 mobile locksmith coverage across Central, North, East, South, and West London. Fast dispatch to your door with upfront fixed quotes. Call 07782 358 889.',
+      'Alphabetical directory of all 60 locksmith service areas across Greater London and surrounding regions. Fast mobile dispatch and fixed quotes on 07782 358 889.',
     canonical: 'https://uklocksmithltd.site/areas',
     includeSchema: true,
   },
@@ -101,20 +104,104 @@ export default defineConfig({
   ssgOptions: {
     script: 'async',
     formatting: 'none',
+    includedRoutes(paths) {
+      const areaPaths = AREAS.map((a) => `/locksmith/${a.slug}`);
+      const filtered = paths.filter((p) => !p.includes(':slug'));
+      return [...filtered, ...areaPaths];
+    },
     onPageRendered(url, renderedHTML) {
       const cleanUrl = url.startsWith('/') ? url : `/${url}`;
-      const normalizedPath = cleanUrl === '/' || cleanUrl === '/index.html' ? '/' : cleanUrl.replace(/\/$/, '');
-      const meta = META_MAP[normalizedPath] || META_MAP['/'];
+      const normalizedPath =
+        cleanUrl === '/' || cleanUrl === '/index.html'
+          ? '/'
+          : cleanUrl.replace(/\/$/, '');
 
-      const schemaHtml = meta.includeSchema
-        ? `<script type="application/ld+json">${JSON.stringify(LOCKSMITH_SCHEMA)}</script>`
+      let meta = META_MAP[normalizedPath];
+      let area = null;
+      let isPilot = false;
+
+      if (!meta && normalizedPath.startsWith('/locksmith/')) {
+        const slug = normalizedPath.replace('/locksmith/', '');
+        area = AREAS.find((a) => a.slug === slug);
+        if (area) {
+          isPilot = PILOT_AREAS[slug] !== undefined;
+          meta = {
+            title: area.title,
+            description: AREA_DESCRIPTIONS[slug] || '',
+            canonical: `${SITE}/locksmith/${slug}`,
+            includeSchema: true,
+            noindex: !isPilot,
+          };
+        }
+      }
+
+      if (!meta) {
+        meta = META_MAP['/'];
+      }
+
+      let schemaHtml = '';
+      if (meta.includeSchema) {
+        if (area) {
+          // LocalBusiness schema with areaServed & Breadcrumbs
+          const areaBusinessSchema = {
+            '@context': 'https://schema.org',
+            '@type': 'Locksmith',
+            name: BRAND,
+            url: meta.canonical,
+            logo: `${SITE}/favicon.svg`,
+            image: `${SITE}/og-image.jpg`,
+            telephone: PHONE_DISPLAY,
+            priceRange: '££',
+            description: meta.description,
+            areaServed: {
+              '@type': 'City',
+              name: area.city,
+            },
+          };
+
+          const breadcrumbsSchema = {
+            '@context': 'https://schema.org',
+            '@type': 'BreadcrumbList',
+            itemListElement: [
+              {
+                '@type': 'ListItem',
+                position: 1,
+                name: 'Home',
+                item: SITE,
+              },
+              {
+                '@type': 'ListItem',
+                position: 2,
+                name: 'Areas',
+                item: `${SITE}/areas`,
+              },
+              {
+                '@type': 'ListItem',
+                position: 3,
+                name: area.city,
+                item: meta.canonical,
+              },
+            ],
+          };
+
+          schemaHtml = `
+    <script type="application/ld+json">${JSON.stringify(areaBusinessSchema)}</script>
+    <script type="application/ld+json">${JSON.stringify(breadcrumbsSchema)}</script>`;
+        } else {
+          schemaHtml = `
+    <script type="application/ld+json">${JSON.stringify(LOCKSMITH_SCHEMA)}</script>`;
+        }
+      }
+
+      const noindexTag = meta.noindex
+        ? '\n    <meta name="robots" content="noindex, nofollow">'
         : '';
 
       const tags = `
     <title>${meta.title}</title>
     <meta name="title" content="${meta.title}">
     <meta name="description" content="${meta.description}">
-    <link rel="canonical" href="${meta.canonical}">
+    <link rel="canonical" href="${meta.canonical}">${noindexTag}
     <meta property="og:type" content="website">
     <meta property="og:url" content="${meta.canonical}">
     <meta property="og:title" content="${meta.title}">
@@ -128,8 +215,7 @@ export default defineConfig({
     <meta name="twitter:url" content="${meta.canonical}">
     <meta name="twitter:title" content="${meta.title}">
     <meta name="twitter:description" content="${meta.description}">
-    <meta name="twitter:image" content="${SITE}/og-image.jpg">
-    ${schemaHtml}`;
+    <meta name="twitter:image" content="${SITE}/og-image.jpg">${schemaHtml}`;
 
       return renderedHTML.replace('<head>', `<head>${tags}`);
     },

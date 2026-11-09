@@ -3,8 +3,11 @@ import Home from './pages/Home';
 import About from './pages/About';
 import Services from './pages/Services';
 import Areas from './pages/Areas';
+import AreaTemplate from './pages/AreaTemplate';
 import Contact from './pages/Contact';
 import NotFound from './pages/NotFound';
+
+import { AREAS } from './data/areas';
 
 export const routes = [
   {
@@ -26,6 +29,11 @@ export const routes = [
       {
         path: 'areas',
         element: <Areas />,
+      },
+      {
+        path: 'locksmith/:slug',
+        element: <AreaTemplate />,
+        getStaticPaths: () => AREAS.map((a) => `/locksmith/${a.slug}`),
       },
       {
         path: 'contact',

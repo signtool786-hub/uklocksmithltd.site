@@ -48,6 +48,10 @@ export const PHONE = {
   tel: 'tel:07782358889',
 };
 
+export { AREAS } from './data/areas';
+export { AREA_DESCRIPTIONS } from './data/area-descriptions';
+export { PILOT_AREAS } from './data/pilot-areas';
+
 export const SITE = 'https://uklocksmithltd.site';
 export const BRAND = 'UK Locksmith LTD';
 export const HOURS = '24 Hours / 7 Days a Week';
@@ -56,7 +60,6 @@ export const NAV_LINKS = [
   { label: 'Home', path: '/' },
   { label: 'About', path: '/about' },
   { label: 'Services', path: '/services' },
-  { label: 'Areas', path: '/areas' },
   { label: 'Contact', path: '/contact' },
 ];
 
