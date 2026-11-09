@@ -8,6 +8,7 @@ import Cta from '../components/Cta';
 export default function Services() {
   return (
     <>
+    {/* Seo  */}
       <Seo
         title="Locksmith Services London | UK Locksmith LTD"
         description="Emergency lockouts, lock changes, UPVC repairs, snapped key extraction, and commercial locks across all London boroughs. Call 07782 358 889 for fixed quotes."
